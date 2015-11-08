@@ -6,8 +6,8 @@ plugins{
     id 'com.github.johnrengelman.shadow' version '1.2.2'
 }
 
-group = 'com.hazelcast.starter'
-version = '1.0-SNAPSHOT'
+group = 'ar.edu.itba'
+version = '0.1'
 
 description = """
 Hazelcast Starter project for Gradle Users
@@ -16,10 +16,11 @@ Hazelcast Starter project for Gradle Users
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-mainClassName = "com.hazelcast.gradle.starter.Starter"
+mainClassName = "main.Lucas"
 applicationDefaultJvmArgs = ["-Xms$HZ_MIN_HEAP_SIZE", "-Xmx$HZ_MAX_HEAP_SIZE"]
 
 repositories {
+	mavenCentral()
     jcenter()
 
     maven {
@@ -55,6 +56,9 @@ dependencies {
     // JCache dependency
     compile "javax.cache:cache-api:1.0.0"
 
+    //Lucas dependencies
+    compile "com.google.code.gson:gson:1.7.2"
+
     // Hazelcast Test Support
     testCompile "com.hazelcast:hazelcast:$HZ_VERSION:tests"
 }
@@ -74,6 +78,7 @@ idea {
 eclipse {
     classpath {
         downloadJavadoc = true
+        downloadSources = true
     }
 }
 
