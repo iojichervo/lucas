@@ -5,6 +5,7 @@ import java.io.FileReader;
 
 import model.Movie;
 import query.FetishActorsQuery;
+import query.PopularActorsQuery;
 import service.Parser;
 import util.TimeUtils;
 import util.UiUtils;
@@ -38,7 +39,9 @@ public class Lucas {
 
             switch ((int) parser.get(Parser.QUERY)) {
                 case 1: {
-                    UiUtils.showMessage("Query 1 (TBI)");
+                    int n = (int) parser.get(Parser.N);
+                    PopularActorsQuery paq = new PopularActorsQuery(n);
+                    paq.performQuery(instance, movies);
                 }
                 case 2: {
                     UiUtils.showMessage("Query 2 (TBI)");

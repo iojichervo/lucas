@@ -18,6 +18,9 @@ public class Movie implements DataSerializable {
     @SerializedName("Director")
     private String director;
 
+    @SerializedName("imdbVotes")
+    private String imdbVotes;
+
    /* Unused fields
     * private String year;
     * private String rated;
@@ -32,7 +35,6 @@ public class Movie implements DataSerializable {
     * private String poster;
     * private String metascore;
     * private String imdbRating;
-    * private String imdbVotes;
     * private String imdbID;
     * private String type;
     * private String tomatoMeter;
@@ -64,11 +66,16 @@ public class Movie implements DataSerializable {
         return title;
     }
 
+    public String getImdbVotes() {
+        return imdbVotes;
+    }
+
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
         out.writeUTF(title);
         out.writeUTF(actors);
         out.writeUTF(director);
+        out.writeUTF(imdbVotes);
     }
 
     @Override
@@ -76,5 +83,6 @@ public class Movie implements DataSerializable {
         title = in.readUTF();
         actors = in.readUTF();
         director = in.readUTF();
+        imdbVotes = in.readUTF();
     }
 }
