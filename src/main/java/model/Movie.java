@@ -12,6 +12,9 @@ public class Movie implements DataSerializable {
     @SerializedName("Title")
     private String title;
 
+    @SerializedName("Year")
+    private String year;
+
     @SerializedName("Actors")
     private String actors;
 
@@ -21,8 +24,10 @@ public class Movie implements DataSerializable {
     @SerializedName("imdbVotes")
     private String imdbVotes;
 
+    @SerializedName("Metascore")
+    private String metascore;
+
    /* Unused fields
-    * private String year;
     * private String rated;
     * private String released;
     * private String runtime;
@@ -33,7 +38,6 @@ public class Movie implements DataSerializable {
     * private String country;
     * private String awards;
     * private String poster;
-    * private String metascore;
     * private String imdbRating;
     * private String imdbID;
     * private String type;
@@ -71,19 +75,46 @@ public class Movie implements DataSerializable {
         return imdbVotes;
     }
 
+    public int getMetascore() {
+        try {
+            int score = Integer.valueOf(metascore);
+            return score;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public boolean isPosteriorTo(int year) {
+        try {
+            int yearOfThisMovie = Integer.valueOf(this.year);
+            return yearOfThisMovie > year;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
         out.writeUTF(title);
+        out.writeUTF(year);
         out.writeUTF(actors);
         out.writeUTF(director);
         out.writeUTF(imdbVotes);
+        out.writeUTF(metascore);
     }
 
     @Override
     public void readData(ObjectDataInput in) throws IOException {
         title = in.readUTF();
+        year = in.readUTF();
         actors = in.readUTF();
         director = in.readUTF();
         imdbVotes = in.readUTF();
+        metascore = in.readUTF();
     }
+
 }

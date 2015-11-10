@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 
 import model.Movie;
+import query.AcclaimedMoviesQuery;
 import query.FetishActorsQuery;
 import query.PopularActorsQuery;
 import service.Parser;
@@ -44,7 +45,9 @@ public class Lucas {
                     paq.performQuery(instance, movies);
                 }
                 case 2: {
-                    UiUtils.showMessage("Query 2 (TBI)");
+                    int max = (int) parser.get(Parser.MAX);
+                    AcclaimedMoviesQuery amq = new AcclaimedMoviesQuery(max);
+                    amq.performQuery(instance, movies);
                 }
                 case 3: {
                     UiUtils.showMessage("Query 3 (TBI)");
