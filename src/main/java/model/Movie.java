@@ -67,6 +67,7 @@ public class Movie implements DataSerializable {
     }
 
     public String getImdbVotes() {
+        if (imdbVotes.contains("N")) return "0"; //TODO improve this
         return imdbVotes;
     }
 

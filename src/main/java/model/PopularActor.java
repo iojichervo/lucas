@@ -21,4 +21,12 @@ public class PopularActor {
         return "The actor " + actor + " has " + votes + " votes";
     }
 
+    public String getActor() {
+        return actor;
+    }
+
+    public BigDecimal getVotes() {
+        return votes;
+    }
+
 }

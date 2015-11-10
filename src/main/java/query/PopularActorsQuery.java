@@ -1,13 +1,14 @@
 package query;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
-import model.FetishActors;
 import model.Movie;
 import model.PopularActor;
 import util.TimeUtils;
@@ -16,6 +17,7 @@ import util.UiUtils;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
+import com.hazelcast.mapreduce.Collator;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
@@ -54,17 +56,18 @@ public class PopularActorsQuery {
         Job<String, Movie> job = tracker.newJob(source);
     
         // Orquestacion de Jobs y lanzamiento
-        ICompletableFuture<Map<String, PopularActor>> future = job 
+        ICompletableFuture<List<PopularActor>> future = job
                 .mapper(new MapperImplementation()) 
                 .reducer(new ReducerImplementation())
-                .submit();
+                .submit(new CollatorImplementation());
         
         // Tomar resultado e Imprimirlo
-        Map<String, PopularActor> rta = future.get();
-    
-        for (Entry<String, PopularActor> e : rta.entrySet()) 
+        List<PopularActor> rta = future.get();
+
+        int min = Math.min(rta.size(), n);
+        for (int i = 0 ; i < min ; i++ )
         {
-            System.out.println(e.getValue());
+            System.out.println(rta.get(i));
         }
         long endTime = System.currentTimeMillis();
         TimeUtils.print("Initial time: ", endTime);
@@ -119,6 +122,29 @@ public class PopularActorsQuery {
                     return map.get(actor);
                 }
             };
+        }
+    }
+
+    public class CollatorImplementation implements
+            Collator<Map.Entry<String, PopularActor>, List<PopularActor>> {
+
+        @Override
+        public List<PopularActor> collate(Iterable<Map.Entry<String, PopularActor>> values) {
+            List<PopularActor> list = new ArrayList<PopularActor>();
+            for (Map.Entry<String, PopularActor> item : values) {
+                list.add(item.getValue());
+            }
+            list.sort(new Comparator<PopularActor>() {
+                @Override
+                public int compare(PopularActor o1, PopularActor o2) {
+                    int i = o1.getVotes().compareTo(o2.getVotes());
+                    if (i == 0) {
+                        return o1.getActor().compareTo(o2.getActor());
+                    }
+                    return -i;
+                }
+            });
+            return list;
         }
     }
 }
