@@ -1,6 +1,9 @@
 package model;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
 
 import com.google.gson.annotations.SerializedName;
 import com.hazelcast.nio.ObjectDataInput;
@@ -62,6 +65,18 @@ public class Movie implements DataSerializable {
         return actors;
     }
 
+    public List<String> getActorsList() {
+        List<String> list = new LinkedList<String>();
+        Scanner scanner = new Scanner(actors);
+        scanner.useDelimiter(",");
+        while (scanner.hasNext()) {
+            String actor = scanner.next().trim();
+            list.add(actor);
+        }
+        scanner.close();
+        return list;
+    }
+
     public String getDirector() {
         return director;
     }
@@ -95,6 +110,42 @@ public class Movie implements DataSerializable {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return title;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((title == null) ? 0 : title.hashCode());
+        result = prime * result + ((year == null) ? 0 : year.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Movie other = (Movie) obj;
+        if (title == null) {
+            if (other.title != null)
+                return false;
+        } else if (!title.equals(other.title))
+            return false;
+        if (year == null) {
+            if (other.year != null)
+                return false;
+        } else if (!year.equals(other.year))
+            return false;
+        return true;
     }
 
     @Override

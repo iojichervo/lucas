@@ -5,6 +5,7 @@ import java.io.FileReader;
 
 import model.Movie;
 import query.AcclaimedMoviesQuery;
+import query.BuddiesQuery;
 import query.FetishActorsQuery;
 import query.PopularActorsQuery;
 import service.Parser;
@@ -50,7 +51,8 @@ public class Lucas {
                     amq.performQuery(instance, movies);
                 }
                 case 3: {
-                    UiUtils.showMessage("Query 3 (TBI)");
+                    BuddiesQuery bq = new BuddiesQuery();
+                    bq.performQuery(instance, movies);
                 }
                 case 4: {
                     FetishActorsQuery faq = new FetishActorsQuery();
