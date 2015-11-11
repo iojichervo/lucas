@@ -1,9 +1,9 @@
 package model;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.math.BigDecimal;
+import java.time.Year;
 import java.util.List;
-import java.util.Scanner;
 
 import com.google.gson.annotations.SerializedName;
 import com.hazelcast.nio.ObjectDataInput;
@@ -16,19 +16,19 @@ public class Movie implements DataSerializable {
     private String title;
 
     @SerializedName("Year")
-    private String year;
+    private Year year;
 
     @SerializedName("Actors")
-    private String actors;
+    private List<String> actors;
 
     @SerializedName("Director")
     private String director;
 
     @SerializedName("imdbVotes")
-    private String imdbVotes;
+    private BigDecimal imdbVotes;
 
     @SerializedName("Metascore")
-    private String metascore;
+    private int metascore;
 
    /* Unused fields
     * private String rated;
@@ -61,55 +61,74 @@ public class Movie implements DataSerializable {
     * private String response;
     */
     
-    public String getActors() {
-        return actors;
-    }
+    public static class Builder {
+        private Movie movie;
 
-    public List<String> getActorsList() {
-        List<String> list = new LinkedList<String>();
-        Scanner scanner = new Scanner(actors);
-        scanner.useDelimiter(",");
-        while (scanner.hasNext()) {
-            String actor = scanner.next().trim();
-            list.add(actor);
+        public Builder() {
+            movie = new Movie();
         }
-        scanner.close();
-        return list;
-    }
 
-    public String getDirector() {
-        return director;
+        public Builder setTitle(String title) {
+            movie.title = title;
+            return this;
+        }
+
+        public Builder setYear(Year year) {
+            movie.year = year;
+            return this;
+        }
+
+        public Builder setActors(List<String> actors) {
+            movie.actors = actors;
+            return this;
+        }
+
+        public Builder setDirector(String director) {
+            movie.director = director;
+            return this;
+        }
+
+        public Builder setImdbVotes(BigDecimal votes) {
+            movie.imdbVotes = votes;
+            return this;
+        }
+
+        public Builder setMetascore(int score) {
+            movie.metascore = score;
+            return this;
+        }
+
+        public Movie build() {
+            return movie;
+        }
     }
 
     public String getTitle() {
         return title;
     }
 
-    public String getImdbVotes() {
-        if (imdbVotes.contains("N")) return "0"; //TODO improve this
+    public Year getYear() {
+        return year;
+    }
+
+    public List<String> getActors() {
+        return actors;
+    }
+
+    public String getDirector() {
+        return director;
+    }
+
+    public BigDecimal getImdbVotes() {
         return imdbVotes;
     }
 
     public int getMetascore() {
-        try {
-            int score = Integer.valueOf(metascore);
-            return score;
-        } catch (Exception e) {
-            return 0;
-        }
+        return metascore;
     }
 
-    public String getYear() {
-        return year;
-    }
-
-    public boolean isPosteriorTo(int year) {
-        try {
-            int yearOfThisMovie = Integer.valueOf(this.year);
-            return yearOfThisMovie > year;
-        } catch (Exception e) {
-            return false;
-        }
+    public boolean isPosteriorTo(int otherYear) {
+        return year.getValue() > otherYear;
     }
 
     @Override
@@ -151,21 +170,21 @@ public class Movie implements DataSerializable {
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
         out.writeUTF(title);
-        out.writeUTF(year);
-        out.writeUTF(actors);
+        out.writeObject(year);
+        out.writeObject(actors);
         out.writeUTF(director);
-        out.writeUTF(imdbVotes);
-        out.writeUTF(metascore);
+        out.writeObject(imdbVotes);
+        out.writeInt(metascore);
     }
 
     @Override
     public void readData(ObjectDataInput in) throws IOException {
         title = in.readUTF();
-        year = in.readUTF();
-        actors = in.readUTF();
+        year = in.readObject();
+        actors = in.readObject();
         director = in.readUTF();
-        imdbVotes = in.readUTF();
-        metascore = in.readUTF();
+        imdbVotes = in.readObject();
+        metascore = in.readInt();
     }
 
 }

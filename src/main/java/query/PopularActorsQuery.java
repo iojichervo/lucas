@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
@@ -28,26 +27,18 @@ import com.hazelcast.mapreduce.ReducerFactory;
 
 public class PopularActorsQuery {
     
-    private static final String MAP_NAME = "movies";
-    
     private int n;
     
     public PopularActorsQuery(int n) {
         this.n = n;
     }
     
-    public void performQuery(HazelcastInstance instance, Movie[] movies) throws InterruptedException, ExecutionException {
+    public void performQuery(HazelcastInstance instance, IMap<String, Movie> moviesMap) throws InterruptedException, ExecutionException {
      // Preparar la particion de datos y distribuirla en el cluster a trav�s del IMap
         UiUtils.showMessage("\nExecuting query 1. Popular actors.");
         long beginTime = System.currentTimeMillis();
         TimeUtils.print("Initial time: ", beginTime);
 
-        IMap<String, Movie> moviesMap = instance.getMap(MAP_NAME);
-        
-        for (Movie movie : movies) {
-            moviesMap.set(movie.getTitle(), movie);
-        }
-        
         // Ahora el JobTracker y los Workers!
         JobTracker tracker = instance.getJobTracker("default");
     
@@ -82,15 +73,10 @@ public class PopularActorsQuery {
 
         public void map(String movieName, Movie movie, Context<String, BigDecimal> context)
         {
-            String actors = movie.getActors();
-            Scanner scanner = new Scanner(actors);
-            scanner.useDelimiter(",");
-            BigDecimal votes = new BigDecimal(movie.getImdbVotes().replaceAll(",", ""));
-            while (scanner.hasNext()) {
-                String actor = scanner.next().trim();
-                context.emit(actor, votes);
+            List<String> actors = movie.getActors();
+            for (String actor : actors) {
+                context.emit(actor, movie.getImdbVotes());
             }
-            scanner.close();
           }
     }
     

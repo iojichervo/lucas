@@ -1,5 +1,6 @@
 package query;
 
+import java.time.Year;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,26 +23,18 @@ import com.hazelcast.mapreduce.ReducerFactory;
 
 public class AcclaimedMoviesQuery {
     
-    private static final String MAP_NAME = "movies";
-    
     private int max;
     
     public AcclaimedMoviesQuery(int max) {
         this.max = max;
     }
     
-    public void performQuery(HazelcastInstance instance, Movie[] movies) throws InterruptedException, ExecutionException {
+    public void performQuery(HazelcastInstance instance, IMap<String, Movie> moviesMap) throws InterruptedException, ExecutionException {
      // Preparar la particion de datos y distribuirla en el cluster a trav�s del IMap
         UiUtils.showMessage("\nExecuting query 2. Acclaimed movies.");
         long beginTime = System.currentTimeMillis();
         TimeUtils.print("Initial time: ", beginTime);
 
-        IMap<String, Movie> moviesMap = instance.getMap(MAP_NAME);
-        
-        for (Movie movie : movies) {
-            moviesMap.set(movie.getTitle(), movie);
-        }
-        
         // Ahora el JobTracker y los Workers!
         JobTracker tracker = instance.getJobTracker("default");
     
@@ -50,15 +43,15 @@ public class AcclaimedMoviesQuery {
         Job<String, Movie> job = tracker.newJob(source);
     
         // Orquestacion de Jobs y lanzamiento
-        ICompletableFuture<Map<String, Movie>> future = job
+        ICompletableFuture<Map<Year, Movie>> future = job
                 .mapper(new MapperImplementation()) 
                 .reducer(new ReducerImplementation())
                 .submit();
         
         // Tomar resultado e Imprimirlo
-        Map<String, Movie> rta = future.get();
+        Map<Year, Movie> rta = future.get();
 
-        for (Entry<String, Movie> e : rta.entrySet()) 
+        for (Entry<Year, Movie> e : rta.entrySet())
         {
             UiUtils.showMessage("For year: " + e.getKey()
                     + ", " + e.getValue().getTitle()
@@ -71,11 +64,11 @@ public class AcclaimedMoviesQuery {
         System.exit(0);
     }
 
-    public class MapperImplementation implements Mapper<String, Movie, String, Movie> 
+    public class MapperImplementation implements Mapper<String, Movie, Year, Movie> 
     {
         private static final long serialVersionUID = 1L;
 
-        public void map(String movieName, Movie movie, Context<String, Movie> context)
+        public void map(String movieName, Movie movie, Context<Year, Movie> context)
         {
             if (movie.isPosteriorTo(max)) {
                 context.emit(movie.getYear(), movie);
@@ -83,19 +76,19 @@ public class AcclaimedMoviesQuery {
           }
     }
     
-    public class ReducerImplementation implements ReducerFactory<String, Movie, Movie> 
+    public class ReducerImplementation implements ReducerFactory<Year, Movie, Movie> 
     {
         private static final long serialVersionUID = 1L;
 
-        public Reducer<Movie, Movie> newReducer(final String year) 
+        public Reducer<Movie, Movie> newReducer(final Year year) 
         {
             return new Reducer<Movie, Movie>()
             {
-                private Map<String, Movie> map;
+                private Map<Year, Movie> map;
                 
                 public void beginReduce()  // una sola vez en cada instancia
                 {
-                    map = new ConcurrentHashMap<String, Movie>();
+                    map = new ConcurrentHashMap<Year, Movie>();
                 }
         
                 public void reduce(Movie movie) 
@@ -114,27 +107,4 @@ public class AcclaimedMoviesQuery {
             };
         }
     }
-/*
-    public class CollatorImplementation implements
-            Collator<Map.Entry<String, PopularActor>, List<Movie>> {
-
-        @Override
-        public List<Movie> collate(Iterable<Map.Entry<String, PopularActor>> values) {
-            List<PopularActor> list = new ArrayList<PopularActor>();
-            for (Map.Entry<String, PopularActor> item : values) {
-                list.add(item.getValue());
-            }
-            list.sort(new Comparator<PopularActor>() {
-                @Override
-                public int compare(PopularActor o1, PopularActor o2) {
-                    int i = o1.getVotes().compareTo(o2.getVotes());
-                    if (i == 0) {
-                        return o1.getActor().compareTo(o2.getActor());
-                    }
-                    return -i;
-                }
-            });
-            return list;
-        }
-    } */
 }

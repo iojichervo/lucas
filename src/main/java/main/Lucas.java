@@ -8,18 +8,24 @@ import query.AcclaimedMoviesQuery;
 import query.BuddiesQuery;
 import query.FetishActorsQuery;
 import query.PopularActorsQuery;
+import service.MovieDeserializer;
 import service.Parser;
 import util.TimeUtils;
 import util.UiUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 
 import exception.ParseException;
 
 public class Lucas {
+
+    private static final String MAP_NAME = "movies";
+
     public static void main(String[] args) {
         try {
             Parser parser = new Parser(args);
@@ -27,7 +33,9 @@ public class Lucas {
             long beginTime = System.currentTimeMillis();
             TimeUtils.print("Starting reading file: ", beginTime);
 
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Movie.class, new MovieDeserializer())
+                .create();
             FileReader reader = new FileReader((File) parser.get(Parser.PATH));
 
             //TODO Make a deserializer to serialize online movies (check on type, exclude tv series)
@@ -38,25 +46,32 @@ public class Lucas {
             UiUtils.showMessage("Time difference: " + (endTime - beginTime) + "ms");
 
             HazelcastInstance instance = Hazelcast.newHazelcastInstance();
+            IMap<String, Movie> moviesMap = instance.getMap(MAP_NAME);
+
+            for (Movie movie : movies) {
+                if (movie != null) {
+                    moviesMap.set(movie.getTitle(), movie);
+                }
+            }
 
             switch ((int) parser.get(Parser.QUERY)) {
                 case 1: {
                     int n = (int) parser.get(Parser.N);
                     PopularActorsQuery paq = new PopularActorsQuery(n);
-                    paq.performQuery(instance, movies);
+                    paq.performQuery(instance, moviesMap);
                 }
                 case 2: {
                     int max = (int) parser.get(Parser.MAX);
                     AcclaimedMoviesQuery amq = new AcclaimedMoviesQuery(max);
-                    amq.performQuery(instance, movies);
+                    amq.performQuery(instance, moviesMap);
                 }
                 case 3: {
                     BuddiesQuery bq = new BuddiesQuery();
-                    bq.performQuery(instance, movies);
+                    bq.performQuery(instance, moviesMap);
                 }
                 case 4: {
                     FetishActorsQuery faq = new FetishActorsQuery();
-                    faq.performQuery(instance, movies);
+                    faq.performQuery(instance, moviesMap);
                 }
                 default: {
                     UiUtils.showError("Invalid query number");

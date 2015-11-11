@@ -27,20 +27,12 @@ import com.hazelcast.mapreduce.ReducerFactory;
 
 public class BuddiesQuery {
     
-    private static final String MAP_NAME = "movies";
-    
-    public void performQuery(HazelcastInstance instance, Movie[] movies) throws InterruptedException, ExecutionException {
+    public void performQuery(HazelcastInstance instance, IMap<String, Movie> moviesMap) throws InterruptedException, ExecutionException {
      // Preparar la particion de datos y distribuirla en el cluster a trav�s del IMap
         UiUtils.showMessage("\nExecuting query 3. Buddies.");
         long beginTime = System.currentTimeMillis();
         TimeUtils.print("Initial time: ", beginTime);
 
-        IMap<String, Movie> moviesMap = instance.getMap(MAP_NAME);
-        
-        for (Movie movie : movies) {
-            moviesMap.set(movie.getTitle(), movie);
-        }
-        
         // Ahora el JobTracker y los Workers!
         JobTracker tracker = instance.getJobTracker("default");
     
@@ -74,7 +66,7 @@ public class BuddiesQuery {
 
         public void map(String movieName, Movie movie, Context<String, Buddy> context)
         {
-            List<String> actors = movie.getActorsList();
+            List<String> actors = movie.getActors();
             for (String actor : actors) {
                 for (String buddy : actors) {
                     if (!actor.equals(buddy)) {
