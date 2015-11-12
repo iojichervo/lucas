@@ -1,5 +1,8 @@
 # Created by https://www.gitignore.io/api/java,intellij,eclipse,gradle
 
+#OSX files
+*.DS_Store
+
 ### Java ###
 *.class
 
