@@ -1,8 +1,13 @@
 package model;
 
+import java.io.IOException;
 import java.util.List;
 
-public class BuddiesAppearances {
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.DataSerializable;
+
+public class BuddiesAppearances implements DataSerializable {
 
     private String actor;
     private String buddy;
@@ -55,4 +60,17 @@ public class BuddiesAppearances {
         return true;
     }
     
+    @Override
+    public void writeData(ObjectDataOutput out) throws IOException {
+        out.writeUTF(actor);
+        out.writeUTF(buddy);
+        out.writeObject(appearances);
+    }
+    
+    @Override
+    public void readData(ObjectDataInput in) throws IOException {
+        actor = in.readUTF();
+        buddy = in.readUTF();
+        appearances = in.readObject();
+    }
 }

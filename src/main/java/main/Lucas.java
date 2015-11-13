@@ -16,7 +16,9 @@ import util.UiUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.hazelcast.core.Hazelcast;
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 
@@ -44,8 +46,28 @@ public class Lucas {
             long endTime = System.currentTimeMillis();
             TimeUtils.print("Finish reading file: ", endTime);
             UiUtils.showMessage("Time difference: " + (endTime - beginTime) + "ms");
+            
 
-            HazelcastInstance instance = Hazelcast.newHazelcastInstance();
+
+            
+            String name= "lucas";
+            String pass= "dev-pass";
+     
+            ClientConfig ccfg= new ClientConfig();
+            ccfg.getGroupConfig().setName(name).setPassword(pass);
+            
+            String addresses= System.getProperty("addresses");
+            if (addresses != null)
+            {   
+                String[] arrayAddresses= addresses.split("[,;]");
+                ClientNetworkConfig net= new ClientNetworkConfig();
+                net.addAddress(arrayAddresses);
+                ccfg.setNetworkConfig(net);
+            }
+            
+            
+
+            HazelcastInstance instance = HazelcastClient.newHazelcastClient(ccfg);
             IMap<String, Movie> moviesMap = instance.getMap(MAP_NAME);
 
             for (Movie movie : movies) {

@@ -1,9 +1,14 @@
 package model;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class FetishActors {
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.DataSerializable;
+
+public class FetishActors implements DataSerializable {
     
     private String director;
     private List<String> actors;
@@ -25,6 +30,18 @@ public class FetishActors {
                 + " with " + appearances + " appearances";
     }
     
-    
+    @Override
+    public void writeData(ObjectDataOutput out) throws IOException {
+        out.writeUTF(director);
+        out.writeObject(actors);
+        out.writeInt(appearances);
+    }
+
+    @Override
+    public void readData(ObjectDataInput in) throws IOException {
+        director = in.readUTF();
+        actors = in.readObject();
+        appearances = in.readInt();
+    }
 
 }
