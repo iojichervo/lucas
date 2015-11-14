@@ -14,6 +14,9 @@ public class FetishActors implements DataSerializable {
     private List<String> actors;
     private int appearances;
 
+    public FetishActors() {
+    }
+
     public FetishActors(String director, int appearances) {
         this.director = director;
         this.actors = new LinkedList<String>();

@@ -4,10 +4,17 @@ import java.io.File;
 import java.io.FileReader;
 
 import model.Movie;
-import query.AcclaimedMoviesQuery;
-import query.BuddiesQuery;
-import query.FetishActorsQuery;
-import query.PopularActorsQuery;
+import query.AcclaimedMoviesMapper;
+import query.AcclaimedMoviesReducer;
+import query.BuddiesCollator;
+import query.BuddiesMapper;
+import query.BuddiesReducer;
+import query.FetishActorsMapper;
+import query.FetishActorsReducer;
+import query.MapReduce;
+import query.PopularActorsCollator;
+import query.PopularActorsMapper;
+import query.PopularActorsReducer;
 import service.MovieDeserializer;
 import service.Parser;
 import util.TimeUtils;
@@ -35,69 +42,64 @@ public class Lucas {
             long beginTime = System.currentTimeMillis();
             TimeUtils.print("Starting reading file: ", beginTime);
 
-            Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Movie.class, new MovieDeserializer())
-                .create();
+            Gson gson = new GsonBuilder().registerTypeAdapter(Movie.class,
+                    new MovieDeserializer()).create();
             FileReader reader = new FileReader((File) parser.get(Parser.PATH));
 
-            //TODO Make a deserializer to serialize online movies (check on type, exclude tv series)
             Movie[] movies = gson.fromJson(reader, Movie[].class);
 
             long endTime = System.currentTimeMillis();
             TimeUtils.print("Finish reading file: ", endTime);
-            UiUtils.showMessage("Time difference: " + (endTime - beginTime) + "ms");
-            
+            UiUtils.showMessage("Time difference: " + (endTime - beginTime)
+                    + "ms");
 
+            String name = "lucas";
+            String pass = "dev-pass";
 
-            
-            String name= "lucas";
-            String pass= "dev-pass";
-     
-            ClientConfig ccfg= new ClientConfig();
+            ClientConfig ccfg = new ClientConfig();
             ccfg.getGroupConfig().setName(name).setPassword(pass);
-            
-            String addresses= System.getProperty("addresses");
-            if (addresses != null)
-            {   
-                String[] arrayAddresses= addresses.split("[,;]");
-                ClientNetworkConfig net= new ClientNetworkConfig();
+
+            String addresses = System.getProperty("addresses");
+            addresses = "192.168.1.105";
+            if (addresses != null) {
+                String[] arrayAddresses = addresses.split("[,;]");
+                ClientNetworkConfig net = new ClientNetworkConfig();
                 net.addAddress(arrayAddresses);
                 ccfg.setNetworkConfig(net);
             }
-            
-            
 
-            HazelcastInstance instance = HazelcastClient.newHazelcastClient(ccfg);
-            IMap<String, Movie> moviesMap = instance.getMap(MAP_NAME);
+            HazelcastInstance client = HazelcastClient.newHazelcastClient(ccfg);
+            IMap<String, Movie> moviesMap = client.getMap(MAP_NAME);
 
             for (Movie movie : movies) {
                 if (movie != null) {
                     moviesMap.set(movie.getTitle(), movie);
                 }
             }
+            MapReduce mr = new MapReduce(client, moviesMap);
 
             switch ((int) parser.get(Parser.QUERY)) {
-                case 1: {
-                    int n = (int) parser.get(Parser.N);
-                    PopularActorsQuery paq = new PopularActorsQuery(n);
-                    paq.performQuery(instance, moviesMap);
-                }
-                case 2: {
-                    int max = (int) parser.get(Parser.MAX);
-                    AcclaimedMoviesQuery amq = new AcclaimedMoviesQuery(max);
-                    amq.performQuery(instance, moviesMap);
-                }
-                case 3: {
-                    BuddiesQuery bq = new BuddiesQuery();
-                    bq.performQuery(instance, moviesMap);
-                }
-                case 4: {
-                    FetishActorsQuery faq = new FetishActorsQuery();
-                    faq.performQuery(instance, moviesMap);
-                }
-                default: {
-                    UiUtils.showError("Invalid query number");
-                }
+            case 1: {
+                int n = (int) parser.get(Parser.N);
+                mr.performQuery(new PopularActorsMapper(),
+                        new PopularActorsReducer(), new PopularActorsCollator());
+            }
+            case 2: {
+                int max = (int) parser.get(Parser.MAX);
+                mr.performQuery(new AcclaimedMoviesMapper(max),
+                        new AcclaimedMoviesReducer(), null);
+            }
+            case 3: {
+                mr.performQuery(new BuddiesMapper(), new BuddiesReducer(),
+                        new BuddiesCollator());
+            }
+            case 4: {
+                mr.performQuery(new FetishActorsMapper(),
+                        new FetishActorsReducer(), null);
+            }
+            default: {
+                UiUtils.showError("Invalid query number");
+            }
             }
 
         } catch (ParseException e) {

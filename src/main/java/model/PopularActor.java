@@ -12,6 +12,9 @@ public class PopularActor implements DataSerializable {
     private String actor;
     private BigDecimal votes;
 
+    public PopularActor() {
+    }
+
     public PopularActor(String actor) {
         this.actor = actor;
         this.votes = new BigDecimal(0);

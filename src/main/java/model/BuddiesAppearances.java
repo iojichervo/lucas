@@ -13,6 +13,9 @@ public class BuddiesAppearances implements DataSerializable {
     private String buddy;
     private List<Movie> appearances;
 
+    public BuddiesAppearances() {
+    }
+
     public BuddiesAppearances(String actor, String buddy, List<Movie> appearances) {
         this.actor = actor;
         this.buddy = buddy;
