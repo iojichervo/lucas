@@ -71,6 +71,8 @@ public class Lucas {
             HazelcastInstance client = HazelcastClient.newHazelcastClient(ccfg);
             IMap<String, Movie> moviesMap = client.getMap(MAP_NAME);
 
+            moviesMap.clear();
+
             for (Movie movie : movies) {
                 if (movie != null) {
                     moviesMap.set(movie.getTitle(), movie);
