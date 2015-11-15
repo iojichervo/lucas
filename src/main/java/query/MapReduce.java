@@ -60,7 +60,7 @@ public class MapReduce {
         }
 
         long endTime = System.currentTimeMillis();
-        TimeUtils.print("Initial time: ", endTime);
+        TimeUtils.print("End time: ", endTime);
         UiUtils.showMessage("Query time: " + (endTime - beginTime) + "ms");
 
         System.exit(0);
