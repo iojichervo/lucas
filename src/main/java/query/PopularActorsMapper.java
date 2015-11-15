@@ -15,9 +15,13 @@ public class PopularActorsMapper implements
 
     public void map(String movieName, Movie movie,
             Context<String, BigDecimal> context) {
+
         List<String> actors = movie.getActors();
+
         for (String actor : actors) {
             context.emit(actor, movie.getImdbVotes());
         }
+
     }
+
 }

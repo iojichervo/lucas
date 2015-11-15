@@ -11,10 +11,13 @@ import com.hazelcast.mapreduce.ReducerFactory;
 
 public class PopularActorsReducer implements
         ReducerFactory<String, BigDecimal, PopularActor> {
+
     private static final long serialVersionUID = 1L;
 
     public Reducer<BigDecimal, PopularActor> newReducer(final String actor) {
+
         return new Reducer<BigDecimal, PopularActor>() {
+
             private Map<String, PopularActor> map;
 
             public void beginReduce() {
@@ -31,6 +34,9 @@ public class PopularActorsReducer implements
             public PopularActor finalizeReduce() {
                 return map.get(actor);
             }
+
         };
+
     }
+
 }

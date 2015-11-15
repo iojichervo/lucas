@@ -12,13 +12,22 @@ import com.hazelcast.mapreduce.Collator;
 public class PopularActorsCollator implements
         Collator<Map.Entry<String, PopularActor>, List<PopularActor>> {
 
-    @Override
+	int n;
+
+    public PopularActorsCollator(int n) {
+    	this.n = n;
+	}
+
+	@Override
     public List<PopularActor> collate(
             Iterable<Map.Entry<String, PopularActor>> values) {
+
         List<PopularActor> list = new ArrayList<PopularActor>();
+
         for (Map.Entry<String, PopularActor> item : values) {
             list.add(item.getValue());
         }
+
         list.sort(new Comparator<PopularActor>() {
             @Override
             public int compare(PopularActor o1, PopularActor o2) {
@@ -29,6 +38,9 @@ public class PopularActorsCollator implements
                 return -i;
             }
         });
-        return list;
+
+        return n > list.size() ? list : list.subList(0, n);
+
     }
+
 }

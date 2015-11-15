@@ -82,7 +82,7 @@ public class Lucas {
             case 1: {
                 int n = (int) parser.get(Parser.N);
                 mr.performQuery(new PopularActorsMapper(),
-                        new PopularActorsReducer(), new PopularActorsCollator());
+                        new PopularActorsReducer(), new PopularActorsCollator(n));
             }
             case 2: {
                 int max = (int) parser.get(Parser.MAX);
