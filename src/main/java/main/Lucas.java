@@ -53,14 +53,20 @@ public class Lucas {
             UiUtils.showMessage("Time difference: " + (endTime - beginTime)
                     + "ms");
 
-            String name = "lucas";
-            String pass = "dev-pass";
+            String name = System.getProperty("name");
+            if (name == null) {
+            	name = "lucas";
+            }
+
+            String pass = System.getProperty("password");
+            if (pass == null) {
+            	pass = "dev-pass";
+            }
 
             ClientConfig ccfg = new ClientConfig();
-            ccfg.getGroupConfig().setName(name).setPassword(pass);
-
+        	ccfg.getGroupConfig().setName(name).setPassword(pass);
+            
             String addresses = System.getProperty("addresses");
-            addresses = "192.168.1.105";
             if (addresses != null) {
                 String[] arrayAddresses = addresses.split("[,;]");
                 ClientNetworkConfig net = new ClientNetworkConfig();
