@@ -12,7 +12,7 @@ import com.hazelcast.mapreduce.Collator;
 public class PopularActorsCollator implements
         Collator<Map.Entry<String, PopularActor>, List<PopularActor>> {
 
-	int n;
+	private int n;
 
     public PopularActorsCollator(int n) {
     	this.n = n;
