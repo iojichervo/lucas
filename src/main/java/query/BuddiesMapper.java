@@ -1,5 +1,7 @@
 package query;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import model.Buddy;
@@ -15,11 +17,11 @@ public class BuddiesMapper implements Mapper<String, Movie, String, Buddy> {
     public void map(String movieName, Movie movie,
             Context<String, Buddy> context) {
         List<String> actors = movie.getActors();
-        for (String actor : actors) {
-            for (String buddy : actors) {
-                if (!actor.equals(buddy)) {
-                    context.emit(actor, new Buddy(buddy, movie));
-                }
+        actors = new ArrayList<String>(actors);
+        Collections.sort(actors);
+        for (int i = 0; i < actors.size() - 1; i++) {
+            for (int j = i + 1; j < actors.size(); j++) {
+                context.emit(actors.get(i), new Buddy(actors.get(j), movie));
             }
         }
     }
