@@ -11,6 +11,9 @@ public class Buddy implements DataSerializable {
     private String actor;
     private Movie movie;
 
+    public Buddy() {
+	}
+    
     public Buddy(String actor, Movie movie) {
         this.actor = actor;
         this.movie = movie;
